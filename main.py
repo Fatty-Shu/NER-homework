@@ -6,7 +6,6 @@ import pickle
 from torch.utils.data import DataLoader, TensorDataset
 from tqdm import tqdm
 import re
-import sys
 from collections import Counter
 import os  # 新增：用于文件存在性判断
 from torchcrf import CRF  # 新增：导入CRF类，解决报错问题
@@ -14,7 +13,7 @@ from torchcrf import CRF  # 新增：导入CRF类，解决报错问题
 # ==================== 配置文件 ====================
 CONFIG = {
     'model_path': 'ner_model_crf_final.pth',
-    'force_retrain': False,  # 设置为True强制重新训练，False则优先加载已有模型
+    'force_retrain': True,  # 设置为True强制重新训练，False则优先加载已有模型
     'seq_len': None,  # 将从数据中获取
     'batch_size': 64,
     'num_epochs': 10,
@@ -55,7 +54,7 @@ if unique_labels.min() > 0:
     # 修正标签映射
     print("尝试修正标签映射...")
     # 创建新的标签映射，确保从0开始
-    all_labels = ['<PAD>', 'O', 'B-PER', 'I-PER', 'B-ORG', 'I-ORG', 'B-LOC', 'I-LOC']
+    all_labels = ['<PAD>', 'O', 'B-PER', 'I-PER', 'B-ORG', 'I-ORG', 'B-LOC', 'I-LOC','B-DISEASE','I-DISEASE','B-BREED','I-BREED','B-FEED','I-FEED']
     label2idx_fixed = {label: idx for idx, label in enumerate(all_labels)}
     idx2label_fixed = {idx: label for idx, label in enumerate(all_labels)}
     
@@ -574,7 +573,7 @@ def load_test_data(file_path, word2idx, label2idx, max_len=seq_len):
 
 # 如果有测试数据，加载并进行评估
 try:
-    test_file = './chinese/test_data'
+    test_file = './chinese/agri_test_data'
     print(f"\n加载测试数据: {test_file}")
     test_inputs, test_outputs = load_test_data(test_file, word2idx, label2idx)
     
@@ -652,14 +651,8 @@ model.load_state_dict(torch.load('best_model_crf.pth'))
 
 # 示例句子
 demo_sentences = [
-    "中国共产党",
-    "中国共产党是中国最大的政党",
-    "江泽民",
-    "坚决贯彻国家主义江泽民关于发展两岸关系",
-    "海钓比赛地点在厦门和金门之间的海域",
-    "中共中央站起来了",
-    "俄罗斯",
-    "新加坡",   
+    "蓝耳病是一种常见猪病", 
+    "宁乡花猪很好吃",
 ]
 
 for sentence in demo_sentences:
